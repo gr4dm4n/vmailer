@@ -32,7 +32,7 @@ class vmailer{
 	* @access private
 	* @var string
 	*/
-	private $mailto;
+	private $mailto = '';
 
    /**
 	* Email title
@@ -55,26 +55,63 @@ class vmailer{
      */
 	private $show_status = true;
 
-	public function vmailer($mailto,$title,$message){
+	/**
+	* Create a new class instance,
+	* the params are $mailsender (mail who send the email),
+	* $title (email title), $message (email message)
+	*
+	* @param string $mailsender
+	* @param string $title
+	* @param string $message
+	*
+	* @return bool
+	*
+	* @see __destruct()
+	*/
+	public function vmailer($mailsender,$title,$message){
+
+		$this->mailsender = $mailsender;
+		$this->title = $title;
+		$this->$message = $message;
+
 		if(DEMO_MODE){
-			/*code here*/
+			$this->print_mail();
+			$return_send = true;
 		}
 		else{
-			/*code here*/
+			$return_send = $this->send_mail();
+		}	
+		
+		return $return_send;
+	}
+
+   /**
+	* Set the email address to which the message is sent
+	*
+	* @param string $mailto
+	*/
+	public function set_mailto($mailto){
+		$this->mailto = $mailto;
+	}
+
+
+	public function get_mail_info($print_info = false,$json_on = false){
+		$mail_info = array(
+			'mailsender' => $this->mailsender,
+			'title'      => $this->title,
+			'message'	 => $this->message,
+			'mailto'	 => $this->mailto
+		);
+
+		if($json_on){
+			$mail_info = json_encode($mail_info);
 		}
 
 		if(DEBUG){
-			/*code here*/	
-		}		
-
-	}
-
-	public function set_mailsender(){
-		/*code here*/
-	}
-
-	public function get_mail_info(){
-		/*code here*/
+			$this->printer($mail_info);	
+		}
+		
+		return $mail_info;
 	}
 
 	public function print_mail(){
