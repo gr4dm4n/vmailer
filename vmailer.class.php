@@ -68,8 +68,9 @@ class vmailer{
 	*
 	* @see __destruct()
 	*/
-	public function vmailer($mailsender,$title,$message){
+	public function vmailer($mailto,$mailsender,$title,$message){
 
+		$this->mailto = $mailto;
 		$this->mailsender = $mailsender;
 		$this->title = $title;
 		$this->$message = $message;
@@ -85,17 +86,12 @@ class vmailer{
 		return $return_send;
 	}
 
-   /**
-	* Set the email address to which the message is sent
-	*
-	* @param string $mailto
+	/**
+	* get mail info configuration
+	* @param string json_on if is true return JSON if is false return ARRAY
+	* @return json|array
 	*/
-	public function set_mailto($mailto){
-		$this->mailto = $mailto;
-	}
-
-
-	public function get_mail_info($print_info = false,$json_on = false){
+	public function get_mail_info($json_on = false){
 		$mail_info = array(
 			'mailsender' => $this->mailsender,
 			'title'      => $this->title,
@@ -106,48 +102,30 @@ class vmailer{
 		if($json_on){
 			$mail_info = json_encode($mail_info);
 		}
-
-		if(DEBUG){
-			$this->printer($mail_info);	
-		}
 		
 		return $mail_info;
 	}
-
+	/* Print mail info configuration */
 	public function print_mail(){
-		/*code here*/
-	}
-
-	/**
-	 * output when error happend,
-	 * @param string
-	 */
-	public function exit_status($str){
-		$this->printer(json_encode(array('status'=>$str)));
-		exit;
-	}
-
-	/**
-	 * Status showing status log
-	 * @param string
-	 */
-	public function status($str){
-		$status = json_encode(array('status'=>$str));
-		if($this->show_status){
-			$this->printer($status);
-		}
-		return $status;		
+			$mail_info = $this->get_mail_info(true);
+			$this->printer($mail_info);	
 	}
 
 	private function send_mail(){
-		$information = "From: <".$this->mailsender.">";
-		$send_mail = mail($this->mailto,$this->title,$this->message,$information);
-		if($send_mail){
-			return true;
+
+		if( ( $this->is_mail( $this->mailto ) ) && ( $this->is_mail( $this->mailto ) ) ){
+			$information = "From: <".$this->mailsender.">";
+			$send_mail = mail($this->mailto,$this->title,$this->message,$information);
+
+			if(DEBUG){
+				$this->print_mail();
+		    }
 		}
 		else{
-			return false;
+			$send_mail = false;
 		}
+		
+		return $send_mail;
 	}
 
 	/**
@@ -159,6 +137,21 @@ class vmailer{
 		}
 		else{
 			echo $info;
+		}
+	}
+
+	/**
+	* Verify if a string is an email
+	* @param string $email
+	* @return bool
+	*/
+	private function is_mail($email){
+		if(preg_match(RE_MAIL, $email))
+		{
+			return true;
+		}
+		else{
+			return false;
 		}
 	}
 
