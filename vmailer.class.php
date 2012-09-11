@@ -140,7 +140,14 @@ class vmailer{
 	}
 
 	private function send_mail(){
-		/*code here*/
+		$information = "From: <".$this->mailsender.">";
+		$send_mail = mail($this->mailto,$this->title,$this->message,$information);
+		if($send_mail){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 
 	/**
