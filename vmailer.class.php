@@ -16,7 +16,7 @@ define('DEBUG',false);
 define('DEMO_MODE', false);
 
 /*Regular expretion email validation*/
-define( 'RE_MAIL' , '^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$' );
+define( 'RE_MAIL' , "/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/" );
 
 class vmailer{
    
@@ -49,11 +49,10 @@ class vmailer{
 	private $message;
 
 	/**
-     * print status on the Screen
      * @var bool
-     * @access private
+     * @access public
      */
-	private $show_status = true;
+	public $return;
 
 	/**
 	* Create a new class instance,
@@ -69,11 +68,15 @@ class vmailer{
 	* @see __destruct()
 	*/
 	public function vmailer($mailto,$mailsender,$title,$message){
-
+		
+		if(DEBUG){
+			echo "\n >>  vmailer start";
+		}
+		
 		$this->mailto = $mailto;
 		$this->mailsender = $mailsender;
 		$this->title = $title;
-		$this->$message = $message;
+		$this->message = $message;
 
 		if(DEMO_MODE){
 			$this->print_mail();
@@ -83,7 +86,8 @@ class vmailer{
 			$return_send = $this->send_mail();
 		}	
 		
-		return $return_send;
+		$this->return = $return_send;
+	
 	}
 
 	/**
@@ -113,19 +117,24 @@ class vmailer{
 
 	private function send_mail(){
 
-		if( ( $this->is_mail( $this->mailto ) ) && ( $this->is_mail( $this->mailto ) ) ){
+		if( ( $this->is_mail( $this->mailto ) ) && ( $this->is_mail( $this->mailsender ) ) ){
 			$information = "From: <".$this->mailsender.">";
-			$send_mail = mail($this->mailto,$this->title,$this->message,$information);
+			$return_mail = mail($this->mailto,$this->title,$this->message,$information);
 
 			if(DEBUG){
 				$this->print_mail();
+				echo "\n >>  send_mail return true;";
 		    }
 		}
 		else{
-			$send_mail = false;
+			$return_mail = false;
+			if(DEBUG){
+				echo "\n >>  send_mail return false;";
+			}
 		}
 		
-		return $send_mail;
+		
+		return $return_mail;
 	}
 
 	/**
@@ -148,9 +157,11 @@ class vmailer{
 	private function is_mail($email){
 		if(preg_match(RE_MAIL, $email))
 		{
+			if(DEBUG){ echo "\n >>  $email is mail"; }
 			return true;
 		}
 		else{
+			if(DEBUG){ echo "\n >>  $email is not a e-mail"; }
 			return false;
 		}
 	}
